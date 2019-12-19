@@ -102,7 +102,7 @@
                                                     ></v-text-field>
                                                     <v-date-picker v-model="header.input" no-title @input="menu_date = false"></v-date-picker>
                                                 
-                                                    </v-menu>          
+                                                    </v-menu>
                                                 </v-list-tile-content>
 
                                                 <v-list-tile-avatar>
@@ -118,9 +118,11 @@
                             <!-- <v-icon small @click="toggleOrder(header.value)" v-if="header.value == filterName ">{{pagination.descending==false?'arrow_upward':'arrow_downward'}}</v-icon> -->
                         </v-flex>
                 </th>
-           </tr>
+            </tr>
         </template>
         <template slot="items"  slot-scope="props">
+            
+            
             <td class="text-xs-left">{{ props.item.PresNumero }}</td>
             <td class="text-xs-left">{{ props.item.PresFechaDesembolso }}</td>
             <td class="text-xs-left">{{ props.item.PadTipo }}</td>
@@ -131,15 +133,31 @@
             <td class="text-xs-left">{{ props.item.PadNombres }}</td>
             <td class="text-xs-left">{{ props.item.PadNombres2do }}</td>
             <td class="text-xs-left">{{ props.item.PadPaterno }}</td>
-            <td class="text-xs-left">{{ props.item.PadMaterno }}</td>
-           
+            <td class="text-xs-left">{{ props.item.PadMaterno}}</td>
             <td class="text-xs-left">{{ props.item.PresCtbNroCpte }}</td>
-            <td class="text-xs-left"> <a  v-bind:href="generate_link(props.item.IdPrestamo)"><v-icon>assignment</v-icon></a> 
+            <td class="text-xs-left">{{ props.item.PrdDsc }}</td>
+            <td>
+                <v-edit-dialog
+                    :return-value.sync="props.item.PresMeses"
+                    large
+                    cancel-text="Cancelar"
+                    save-text="Guardar"
+                    @save="updateLoan(props.item.IdPrestamo, {'PresMeses': props.item.PresMeses})"
+                    @cancel="cancelPrueba(props.item.IdPrestamo)"
+                > {{ props.item.PresMeses }}
+                    <v-text-field
+                        slot="input"
+                        v-model="props.item.PresMeses"
+                        single-line
+                        autofocus
+                    ></v-text-field>
+                </v-edit-dialog>
+            </td>
+            <td class="text-xs-left"> <a  v-bind:href="generate_link(props.item.IdPrestamo)"><v-icon>assignment</v-icon></a>
                 <v-btn icon @click="makePDF(props.item.IdPrestamo)"><v-icon color="info">insert_drive_file</v-icon></v-btn>
             </td>
-            
         </template>
-
+        
         </v-data-table>
         
         <div class="text-xs-center">
@@ -147,16 +165,20 @@
             v-model="page"
             :length="last_page"
             :total-visible="7"
-             @input="next"
+            @input="next"
             ></v-pagination>
-        </div>   
-         <div class="text-xs-right">
-            
+        </div>
+        <div class="text-xs-right">
+
             <v-flex xs11 sm11 md11>
                 Mostrando {{from}}-{{to}} de {{total}} registros 
             </v-flex>
 
         </div>
+            <v-snackbar v-model="snack" :timeout="3000" :color="snackColor">
+        {{ snackText }}
+        <v-btn text @click="snack = false">Close</v-btn>
+      </v-snackbar>
         <br>
 
 
@@ -192,24 +214,29 @@
                 </div>
                 </v-container>
             </v-card-text>
-
-     
             </v-card>
-        </v-dialog>  
+        </v-dialog>
 
     </v-card>
+    
 </template>
 <script>
 import * as jsPDF from 'jspdf';
+
 require('jspdf-autotable');
 export default {
     data () {
-      return {
+        return {
+        snack: false,
+      snackColor: '',
+      snackText: '',
+      max25chars: v => v.length <= 25 || 'Input too long!',
+
         dialog: false,
         menu_date: false,
         // date:false,
         pagination: {
-          sortBy: 'PresNumero'
+        sortBy: 'PresNumero'
         },
         headers: [
             { text: 'Nro Prestamo', value: 'PresNumero',input:'' , menu:false,type:"text"},
@@ -224,6 +251,8 @@ export default {
             { text: 'Ap. Paterno', value: 'PadPaterno',input:'', menu:false,type:"text"},
             { text: 'Ap. Materno',value:'PadMaterno',input:'', menu:false,type:"text"},
             { text: 'Nro Comprobante',value:'PresCtbNroCpte',input:'', menu:false,type:"text"},
+            { text: 'Descripcion', value: 'PrdDsc',input:'' , menu:false,type:"text"},
+            { text: 'Plazo Meses', value: 'PresMeses',input:'' , menu:false,type:"text"},
             { text: 'Accion',value:'actions',input:'', menu:false,type:"text"},
         ],
         amortizations: [],
@@ -261,12 +290,48 @@ export default {
     },
     created(){
         //   axios.get('/api/amortizacion/create')
-        //         .then((response) => {                                       
-        //             this.newProvider = response.data.amortizacion; 
-        //             this.newContact = response.data.contact; 
-        //         });    
+        //         .then((response) => {
+        //             this.newProvider = response.data.amortizacion;
+        //             this.newContact = response.data.contact;
+        //         });
     },
     methods:{
+       async updateLoan(id, codigo) {
+        try{
+            this.loading = true
+          let res = await axios.patch(`/api/loans/${id}`, codigo)
+          console.log(res.data)
+          
+         
+      } catch (e) {
+        console.log(e)
+      } finally {
+        this.loading = false
+      }
+        },
+        cancelPrueba(id) {
+            this.search()
+            
+        },
+
+         save () {
+      this.snack = true
+      this.snackColor = 'success'
+      this.snackText = 'Data saved'
+    },
+    cancel () {
+      this.snack = true
+      this.snackColor = 'error'
+      this.snackText = 'Canceled'
+    },
+    open () {
+      this.snack = true
+      this.snackColor = 'info'
+      this.snackText = 'Dialog opened'
+    },
+    close () {
+      console.log('Dialog closed')
+    },
         
         getData(url,parameters){
             return new Promise((resolve,reject)=>{
@@ -285,8 +350,7 @@ export default {
             this.search();
         },
         search(){
-            
-            return new Promise((resolve,reject)=>{   
+            return new Promise((resolve,reject)=>{
                 this.getData('/api/loans',this.getParams()).then((data)=>{
                     this.amortizations = data.data;
                     this.last_page = data.last_page;
@@ -333,7 +397,6 @@ export default {
             //  self.dialog = true;
             let parameters = this.getParams();
             parameters.excel =true;
-            console.log(parameters);
             axios({
                 url: '/api/loans',
                 method: 'GET',
@@ -440,7 +503,7 @@ export default {
                         {'name':'Capital','money':'Bs','monto':this.certification.amortizacion.AmrCap},
                         {'name':'Interés corriente','money':'Bs','monto':this.certification.amortizacion.AmrInt},
                         {'name':'Interés Penal','money':'Bs','monto':this.certification.amortizacion.AmrIntPen},
-                        {'name':'Total','money':'Bs','monto':this.certification.amortizacion.AmrTotPag},           
+                        {'name':'Total','money':'Bs','monto':this.certification.amortizacion.AmrTotPag},
                     ];
                     y+=10;
                     // var x = 20;
@@ -477,28 +540,24 @@ export default {
                     this.cadena = d.output('datauristring');
             });
 
-          
            // $('iframe').attr('src', cadena);
         }
         // toggleOrder (filter) {
         //     this.filterName = filter;
         //     this.search(filter).then(()=>{
-        //         this.pagination.sortBy = this.filterName; 
+        //         this.pagination.sortBy = this.filterName;
         //         this.pagination.descending = !this.pagination.descending
-        //     });    
+        //     });
         // },
-       
-      
     },
     watch: {
-        filterValue (fv) {      
+        filterValue (fv) {
             if (fv =='') {
                 this.search();
             }
         }
     },
     computed:{
-      
     }
 }
 </script>

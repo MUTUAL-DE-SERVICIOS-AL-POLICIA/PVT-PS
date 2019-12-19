@@ -233,7 +233,7 @@ class LoanReportController extends Controller
                                         ->get();
     
         global $prestamos;
-        $prestamos =[ array('FechaDesembolso','Numero','Cuota','SaldoActual','Tipo','MatriculaTitular','MatriculaDerechohabiente','CI','Extension','PrimerNombre','SegundoNombre','Paterno','Materno','Frecuencia','Descuento','ciudad')];
+        $prestamos =[ array('FechaDesembolso','Numero','Cuota','SaldoActual','Tipo','MatriculaTitular','MatriculaDerechohabiente','CI','Extension','PrimerNombre','SegundoNombre','Paterno','Materno','Frecuencia','Descuento','ciudad', 'tiempo')];
 
         foreach($loans as $loan)
         {
@@ -294,6 +294,7 @@ class LoanReportController extends Controller
                 $loan->State,
                 $loan->Discount,
                 $loan->City,
+                $loan->PresMeses,
         ));
         }
 
