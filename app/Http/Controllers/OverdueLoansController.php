@@ -34,7 +34,7 @@ class OverdueLoansController extends Controller
         $prestamos= [];
         global $rows_exacta;
         $rows_exacta = Array();
-        array_push($rows_exacta,array('PTMO','Fecha Desembolso','Cuota Mensual','Saldo Actual','Tipo','Producto','Matricula','C.I.',' Ap. Paterno','Ap.Materno','Nombre','Segundo Nombre','Meses Mora','matricula','ci','ext','nom1','nom2','paterno','materno','tipo','Interes'));
+        array_push($rows_exacta,array('PTMO','Fecha Desembolso','Cuota Mensual','Saldo Actual','Tipo','Producto','Matricula','C.I.',' Ap. Paterno','Ap.Materno','Nombre','Segundo Nombre','Nro Celular','Días Mora','matricula','ci','ext','nom1','nom2','paterno','materno','tipo','Interes'));
         foreach($loans as $loan)
         {
             $padron = DB::table('Padron')->where('IdPadron',$loan->IdPadron)->first();
@@ -46,13 +46,11 @@ class OverdueLoansController extends Controller
             $loan->PadCedulaIdentidad =utf8_encode(trim($padron->PadCedulaIdentidad));
             $loan->PadExpCedula =utf8_encode(trim($padron->PadExpCedula));
             $loan->PadMatricula =utf8_encode(trim($padron->PadMatricula));
-            
-            
-            
+            $loan->PadCelular =utf8_encode(trim($padron->PadCelular));
             
             if($excel!='')//reporte excel hdp 
             {
-                $row = array($loan->PresNumero,$loan->PresFechaDesembolso,$loan->PresCuotaMensual,$loan->PresSaldoAct,$loan->PadTipo,$loan->PrdDsc,$loan->PadMatricula,$loan->PadCedulaIdentidad,$loan->PadPaterno,$loan->PadMaterno,$loan->PadNombres,$loan->PadNombres2do,$loan->meses_mora,$loan->prestasaint);
+                $row = array($loan->PresNumero,$loan->PresFechaDesembolso,$loan->PresCuotaMensual,$loan->PresSaldoAct,$loan->PadTipo,$loan->PrdDsc,$loan->PadMatricula,$loan->PadCedulaIdentidad,$loan->PadPaterno,$loan->PadMaterno,$loan->PadNombres,$loan->PadNombres2do,$loan->PadCelular,$loan->meses_mora,$loan->prestasaint);
                 
                 $garantes = DB::table('PrestamosLevel1')->where('IdPrestamo','=',$loan->IdPrestamo)->get();
                 if(sizeof($garantes)>0)
@@ -79,7 +77,7 @@ class OverdueLoansController extends Controller
                                 global $rows_exacta;
                 
                                 $sheet->fromModel($rows_exacta,null, 'A1', false, false);
-                                $sheet->cells('A1:M1', function($cells) {
+                                $sheet->cells('A1:V1', function($cells) {
                                 // manipulate the range of cells
                                 $cells->setBackground('#058A37');
                                 $cells->setFontColor('#ffffff');  
