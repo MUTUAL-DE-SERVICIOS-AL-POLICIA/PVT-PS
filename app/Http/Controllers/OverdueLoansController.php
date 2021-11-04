@@ -34,7 +34,7 @@ class OverdueLoansController extends Controller
         $prestamos= [];
         global $rows_exacta;
         $rows_exacta = Array();
-        array_push($rows_exacta,array('Prestamos.PresNumero','PresFechaDesembolso','Cutoa Mensual','Saldo Actual','Tipo','Producto','Padron.PadMatricula',' Padron.PadCedulaIdentidad',' Padron.PadPaterno','Padron.PadMaterno',' Padron.PadNombres','Padron.PadNombres2do','Meses Mora','matricula','ci','ext','nom1','nom2','paterno','materno','tipo','Interes'));
+        array_push($rows_exacta,array('PTMO','Fecha Desembolso','Cuota Mensual','Saldo Actual','Tipo','Producto','Matricula','C.I.',' Ap. Paterno','Ap.Materno','Nombre','Segundo Nombre','Meses Mora','matricula','ci','ext','nom1','nom2','paterno','materno','tipo','Interes'));
         foreach($loans as $loan)
         {
             $padron = DB::table('Padron')->where('IdPadron',$loan->IdPadron)->first();
