@@ -168,9 +168,9 @@ class LoanReportController extends Controller
     public function Loans()
     {
         // aumenta el tiempo máximo de ejecución de este script a 150 min: 
-        ini_set ('max_execution_time', 9000); 
+        ini_set ('max_execution_time', 36000); 
         // aumentar el tamaño de memoria permitido de este script: 
-        ini_set ('memory_limit', '960M');
+        ini_set ('memory_limit', '9600M');
 
         $loans = DB::table('Prestamos')->where('PresEstPtmo','=','V')->get();
 
@@ -452,7 +452,7 @@ class LoanReportController extends Controller
     {
         ini_set ('max_execution_time', 36000); 
         // aumentar el tamaño de memoria permitido de este script: 
-        ini_set ('memory_limit', '960M');
+        ini_set ('memory_limit', '9600M');
         global $rows_exacta,$rows_not_found,$rows_desc_mayor,$rows_desc_menor,$rows_segundo_prestamo,$prestamos_noreg,$rows_gar;
         $path = storage_path('excel/import/MUSERPOL AGOSTO 2018.xls');
         Excel::selectSheetsByIndex(0)->load($path, function($reader) {
@@ -538,7 +538,7 @@ class LoanReportController extends Controller
     {
         ini_set ('max_execution_time', 36000); 
         // aumentar el tamaño de memoria permitido de este script: 
-        ini_set ('memory_limit', '960M');
+        ini_set ('memory_limit', '9600M');
         // $loans =DB::table('Prestamos')->leftJoin('Padron','Padron.IdPadron','=','Prestamos.IdPadron')
         //             ->whereIn('Prestamos.IdPrestamo',[10239,10280,10587,10611,10625,10704,10819,10826,11117,11468,11605,11676,11915,12198,12219,12301,12364,12453,12840,12997,13000,13080,13133,13188,13439,13734,13758,13942,13958,14011,14074,14096,14158,14308,14326,14538,14748,14921,14925,15033,15119,15236,15239,15252,15391,15447,20503,25274,17479,20510,16471,16874,15865,20517,28745,17237,17241,27951,28605,30530,26446,17676,16429,20501,29182,20500,20514,28702,22943,28300,17591,20513,28016,16529,16849,20520,30700,29545,16284,28719,28582,16809,27452,28910,28403,29524,20505,24670,27693,15669,21735,28757,30766,20509,23882,28452,29494,19800,30887,28857,27206,15635,16402,18377,26985,29040,21726,21447,30077,29817,17194,21572,28442,28194,23073,21649,23194,20606,31891,21608,28770,31892,22542,22155,30298,21738,34165,32648,32159,32684,33163,33506,32979,33241,34786,33231,34684,32987,34191,35003,33057,33598,34824,33193,34025,34232,33628,34493,34942,32335,33897,34503,34603,33712,34253,32209,35528,36067,38099,37486,38039,38418,36904,37734,36042,36146,39149,36996,37638,38676,39134,38741,39128,38585,37924,35424,37022,35603,35985,38129,36710,37798,37983,38209,37343,35653,36396,36822,36954,36487,35618,35757,36264,36862,37361,35931,36011,41219,40191,41263,39897,39428,41259,41548,41940,41692,42804,41334,41690,41911,42941,40023,41465,42290,40317,39963,40070,39775,39649,39353,39405,39750,40224,39482,39727,44539,48333,43696,46737,48220,47013,47927,48217,47256,47368,48385,48646,48800,45503,45994,47773,48708,44801,45870,45963,47796,44974,47147,43672,43917,44882,44266,44257,45230,45574,43375,43218,50767,49190,49457,49733,50624,49302,49219])
         //             // ->where('Padron.PadTipRentAFPSENASIR','=','SENASIR')
@@ -662,7 +662,7 @@ class LoanReportController extends Controller
     {
         ini_set ('max_execution_time', 36000); 
         // aumentar el tamaño de memoria permitido de este script: 
-        ini_set ('memory_limit', '960M');
+        ini_set ('memory_limit', '9600M');
 
         $loans = DB::table('Prestamos')
                         ->join('Padron','Padron.IdPadron','=','Prestamos.IdPadron')

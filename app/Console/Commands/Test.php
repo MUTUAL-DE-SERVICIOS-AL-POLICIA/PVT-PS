@@ -42,7 +42,7 @@ class Test extends Command
         //
         ini_set ('max_execution_time', 36000); 
         // aumentar el tamaño de memoria permitido de este script: 
-        ini_set ('memory_limit', '960M');
+        ini_set ('memory_limit', '9600M');
 
         $loans = DB::table('Prestamos')
                         ->join('Padron','Padron.IdPadron','=','Prestamos.IdPadron')
