@@ -15,6 +15,11 @@ class OverdueLoansController extends Controller
      */
     public function index()
     {
+        // aumenta el tiempo máximo de ejecución de este script a 150 min: 
+        ini_set ('max_execution_time', 36000); 
+        // aumentar el tamaño de memoria permitido de este script: 
+        ini_set ('memory_limit', '9600M');
+
         $excel = request('excel')??'';
         $date = request('date')??'2018-08-31';
         // Log::info($excel);
