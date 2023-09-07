@@ -854,7 +854,7 @@ class LoanReportController extends Controller
         array_push($rows_headers, array(
             'Nro Préstamo', 'Fecha de Solicitud', 'Monto Desembolsado', 'Fecha de Desembolso',
             'Total Suma Amortizaciones', 'Plazo', 'Diferencia', 'Estado'
-        ))
+        ));
 
         foreach($loans as $loan)
         {
