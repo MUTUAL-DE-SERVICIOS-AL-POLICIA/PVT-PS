@@ -32,7 +32,7 @@
         </v-dialog>
         <v-spacer></v-spacer>
         <v-select
-            :items="reports"
+            :items="filteredReports"
             label="Tipo de reporte"
             item-text="name"
             item-value="id"
@@ -49,17 +49,33 @@ export default {
             loading: true,
             reports: [
                 {
+                    id: 1,
                     name: 'Préstamos cancelados cuya suma de sus amortizaciones es distinto al monto desembolsado',
-                    id: 1
+                    disabled: true,
                 },{
+                    id: 2,
                     name: 'Préstamos cancelados cuya suma de sus amortizaciones es mayor al monto desembolsado',
-                    id: 2
+                    disabled: true,
                 }, {
+                    id: 3,
                     name: 'Préstamos con estado pendiente cuya suma de sus amortizaciones canceladas más sus amortizaciones con estado pendiente es igual a su saldo capital',
-                    id: 3
+                    disabled: true,
+                }, {
+                    id: 4,
+                    name: 'Préstamos con estado pendiente',
+                    disabled: false,
+                }, {
+                    id: 5,
+                    name: 'Amortizaciones con estado pendiente',
+                    disabled: false,
                 }
             ],
             report_selected: null
+        }
+    },
+    computed: {
+        filteredReports() {
+            return this.reports.filter(report => !report.disabled)
         }
     },
     methods: {
