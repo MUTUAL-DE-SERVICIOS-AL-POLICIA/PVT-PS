@@ -850,7 +850,7 @@ class LoanReportController extends Controller
         $rows_headers = array();
         // Cabezera
         array_push($rows_headers, array(
-            'Nro Prestamo', 'Fecha de Solicitud', 'Meses', 'Fecha de Desembolso', 'Saldo Anterior'
+            'Nro Prestamo', 'Fecha de Solicitud', 'Meses', 'Fecha de Desembolso', 'Saldo Anterior',
             'Saldo Actual', 'Estado', 'Monto Desembolsado', 'Total Suma Amortizaciones', 'Monto Solicitado',
             'Diferencia'
         ));
@@ -879,9 +879,9 @@ class LoanReportController extends Controller
                     global $rows_headers;
                     $sheet->fromModel($rows_headers, null, 'A1', false, false);
                     $sheet->cells('A1:K1', function($cells) {
-                    $cells->setBackground('#058A37');
-                    $cells->setFontColor('#ffffff');  
-                    $cells->setFontWeight('bold');
+                        $cells->setBackground('#058A37');
+                        $cells->setFontColor('#ffffff');  
+                        $cells->setFontWeight('bold');
                     });
                 });
         })->download('xls');
