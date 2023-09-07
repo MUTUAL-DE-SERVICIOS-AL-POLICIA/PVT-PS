@@ -867,7 +867,7 @@ class LoanReportController extends Controller
                 $loan->Estado,
                 $loan->PresMntDesembolso,
                 $loan->SumAmr,
-                $loan->PresMontoSol
+                $loan->PresMontoSol,
                 $loan->diferencia
             ));
         }
