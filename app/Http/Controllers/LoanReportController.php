@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use DB;
 use Log;
+use Illuminate\Database\Query\JoinClause;
+
 class LoanReportController extends Controller
 {
     /**
@@ -772,5 +774,202 @@ class LoanReportController extends Controller
                 
                   
         })->download('xls');  
+    }
+    public function pending_loan_report($report_type) {
+        ini_set ('max_execution_time', 36000); 
+        ini_set ('memory_limit', '9600M');
+        global $rows_headers;
+        $rows_headers = array();
+        $cell_limit = 'H1';
+
+        switch($report_type) {
+            case 1: // Préstamos cancelados cuya suma de sus amortizaciones es distinto al monto desembolsado
+                $loans = DB::select(DB::raw("
+                    SELECT p.IdPrestamo, p.PresNumero, p.PresFechaPrestamo,
+                        p.PresMeses, p.PresFechaDesembolso,
+                        CASE 
+                            WHEN p.PresEstPtmo = 'X' THEN 'CANCELADO'
+                            ELSE 'No especificado'
+                        END AS Estado,
+                        p.PresMntDesembolso, tmp.SumAmr, (p.PresMntDesembolso  - tmp.SumAmr) AS diferencia
+                    FROM Prestamos p 
+                    JOIN (
+                        SELECT p2.IdPrestamo, SUM(a.AmrCap) AS SumAmr
+                        FROM Prestamos p2 
+                        INNER JOIN Amortizacion a
+                        ON p2.IdPrestamo = a.IdPrestamo 
+                        WHERE p2.PresEstPtmo = 'X' 
+                        AND (a.AmrSts = 'S'
+                        OR a.AmrSts = 'P')
+                        GROUP BY p2.IdPrestamo
+                    ) AS tmp
+                    ON p.IdPrestamo = tmp.IdPrestamo
+                    WHERE p.PresMntDesembolso <> tmp.SumAmr 
+                "));
+                array_push($rows_headers, array(
+                    'Nro Préstamo', 'Fecha de Solicitud', 'Monto Desembolsado', 'Fecha de Desembolso',
+                    'Total Suma Amortizaciones', 'Plazo', 'Diferencia', 'Estado'
+                ));
+                foreach($loans as $loan) {
+                    array_push($rows_headers, array(
+                        $loan->PresNumero,
+                        $loan->PresFechaPrestamo,
+                        $loan->PresMntDesembolso,
+                        $loan->PresFechaDesembolso,
+                        $loan->SumAmr,
+                        $loan->PresMeses,
+                        $loan->diferencia,
+                        $loan->Estado
+                    ));
+                }
+                break;
+            case 2: // Préstamos cancelados cuya suma de sus amortizaciones es mayor al monto desembolsado
+                $loans = DB::select(DB::raw("
+                    SELECT p.IdPrestamo, p.PresNumero, p.PresFechaPrestamo,
+                        p.PresMeses, p.PresFechaDesembolso,
+                        CASE 
+                            WHEN p.PresEstPtmo = 'X' THEN 'CANCELADO'
+                            ELSE 'No especificado'
+                        END AS Estado,
+                        p.PresMntDesembolso, tmp.SumAmr, (p.PresMntDesembolso  - tmp.SumAmr) AS diferencia
+                    FROM Prestamos p 
+                    JOIN (
+                        SELECT p2.IdPrestamo, SUM(a.AmrCap) AS SumAmr
+                        FROM Prestamos p2 
+                        INNER JOIN Amortizacion a
+                        ON p2.IdPrestamo = a.IdPrestamo 
+                        WHERE p2.PresEstPtmo = 'X' 
+                        AND (a.AmrSts = 'S'
+                        OR a.AmrSts = 'P')
+                        GROUP BY p2.IdPrestamo
+                    ) AS tmp
+                    ON p.IdPrestamo = tmp.IdPrestamo
+                    WHERE p.PresMntDesembolso < tmp.SumAmr
+                "));
+                array_push($rows_headers, array(
+                    'Nro Préstamo', 'Fecha de Solicitud', 'Monto Desembolsado', 'Fecha de Desembolso',
+                    'Total Suma Amortizaciones', 'Plazo', 'Diferencia', 'Estado'
+                ));
+                foreach($loans as $loan) {
+                    array_push($rows_headers, array(
+                        $loan->PresNumero,
+                        $loan->PresFechaPrestamo,
+                        $loan->PresMntDesembolso,
+                        $loan->PresFechaDesembolso,
+                        $loan->SumAmr,
+                        $loan->PresMeses,
+                        $loan->diferencia,
+                        $loan->Estado
+                    ));
+                }
+                break;
+            case 3: // Préstamos con estado pendiente cuya suma de sus amortizaciones canceladas más sus amortizaciones con estado pendiente es igual a su saldo capital
+                $loans = DB::select(DB::raw("
+                    SELECT p.IdPrestamo, p.PresNumero, p.PresFechaPrestamo,
+                        p.PresMeses, p.PresFechaDesembolso,
+                        CASE 
+                            WHEN p.PresEstPtmo = 'X' THEN 'CANCELADO'
+                            ELSE 'No especificado'
+                        END AS Estado,
+                        p.PresMntDesembolso, tmp.SumAmr, (p.PresMntDesembolso  - tmp.SumAmr) AS diferencia
+                    FROM Prestamos p 
+                    JOIN (
+                        SELECT p.IdPrestamo, SUM(a.AmrCap) AS SumAmr
+                        FROM Prestamos p
+                        INNER JOIN Amortizacion a 
+                        ON p.IdPrestamo  = a.IdPrestamo 
+                        WHERE p.PresEstPtmo = 'E'
+                        AND (a.AmrSts = 'P' OR a.AmrSts = 'S')
+                        GROUP BY p.IdPrestamo 
+                    ) AS tmp
+                    ON p.IdPrestamo = tmp.IdPrestamo
+                    WHERE p.PresMntDesembolso = tmp.SumAmr
+                "));
+                array_push($rows_headers, array(
+                    'Nro Préstamo', 'Fecha de Solicitud', 'Monto Desembolsado', 'Fecha de Desembolso',
+                    'Total Suma Amortizaciones', 'Plazo', 'Diferencia', 'Estado'
+                ));
+                foreach($loans as $loan) {
+                    array_push($rows_headers, array(
+                        $loan->PresNumero,
+                        $loan->PresFechaPrestamo,
+                        $loan->PresMntDesembolso,
+                        $loan->PresFechaDesembolso,
+                        $loan->SumAmr,
+                        $loan->PresMeses,
+                        $loan->diferencia,
+                        $loan->Estado
+                    ));
+                }
+                break;
+            case 4: // Préstamos con estado pendiente
+                $cell_limit = 'F1';
+                $loan = DB::select(DB::raw("
+                    SELECT p.IdPrestamo, p.PresNumero, p.PresFechaPrestamo,
+                    p.PresMeses, p.PresFechaDesembolso, p.PresMntDesembolso, 'PENDIENTE' AS Estado
+                    FROM Prestamos p
+                    WHERE p.PresEstPtmo = 'E'
+                    ORDER BY p.IdPrestamo
+                "));
+                array_push($rows_headers, array(
+                    'Nro Préstamo', 'Fecha de Solicitud', 'Monto Desembolsado', 'Fecha de Desembolso',
+                    'Plazo', 'Estado'
+                ));
+                foreach($loans as $loan) {
+                    array_push($rows_headers, array(
+                        $loan->PresNumero,
+                        $loan->PresFechaPrestamo,
+                        $loan->PresMntDesembolso,
+                        $loan->PresFechaDesembolso,
+                        $loan->PresMeses,
+                        $loan->Estado
+                    ));
+                }
+                break;
+            case 5: // Amortizaciones con estado pendiente
+                $cell_limit = 'J1';
+                $amortizations = DB::select(DB::raw("
+                    SELECT p.PresNumero, a.AmrFecPag, a.AmrCap, a.AmrInt, 
+                    a.AmrIntPen, a.AmrOtrCob, a.AmrTotPag, a.AmrIntDias, a.AmrIntPenDias, 'PENDIENTE' AS Estado
+                    FROM Amortizacion a 
+                    INNER JOIN Prestamos p 
+                    ON a.IdPrestamo = p.IdPrestamo 
+                    WHERE a.AmrSts = 'P'
+                    ORDER BY p.PresNumero
+                "));
+                array_push($rows_headers, array(
+                    'Nro Préstamo', 'Fecha de pago', 'Pago a Capital', 'Pago a Interés', 'Pago a Interés Penal', 'Pago a otros cobros',
+                    'Total pagado', 'Días de Interés', 'Días de Interés Penal', 'Estado del cobro'
+                ));
+                foreach($amortizations as $amortization) {
+                    array_push($rows_headers, array(
+                        $amortization->PresNumero,
+                        $amortization->AmrFecPag,
+                        $amortization->AmrCap,
+                        $amortization->AmrInt,
+                        $amortization->AmrIntPen,
+                        $amortization->AmrOtrCob,
+                        $amortization->AmrTotPag,
+                        $amortization->AmrIntDias,
+                        $amortization->AmrIntPenDias,
+                        $amortization->Estado
+                    ));
+                }
+            break;
+        }
+
+        Excel::create('prestamos', function($excel)
+        {
+            global $rows_headers;
+                $excel->sheet('Reporte Préstamos', function($sheet) {
+                    global $rows_headers;
+                    $sheet->fromModel($rows_headers, null, 'A1', false, false);
+                    $sheet->cells('A1:'.$cell_limit, function($cells) {
+                        $cells->setBackground('#058A37');
+                        $cells->setFontColor('#ffffff');  
+                        $cells->setFontWeight('bold');
+                    });
+                });
+        })->download('xls');
     }
 }
