@@ -904,7 +904,7 @@ class LoanReportController extends Controller
                 break;
             case 4: // Préstamos con estado pendiente
                 $cell_limit = 'F1';
-                $loan = DB::select(DB::raw("
+                $loans = DB::select(DB::raw("
                     SELECT p.IdPrestamo, p.PresNumero, p.PresFechaPrestamo,
                     p.PresMeses, p.PresFechaDesembolso, p.PresMntDesembolso, 'PENDIENTE' AS Estado
                     FROM Prestamos p
