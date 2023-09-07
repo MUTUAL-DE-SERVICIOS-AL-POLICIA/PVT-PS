@@ -778,8 +778,8 @@ class LoanReportController extends Controller
     public function pending_loan_report($report_type) {
         if($report_type == 1) {
             $loans = DB::select(DB::raw("
-                SELECT p.IdPrestamo, p.PresNumero, CONVERT(DATE, p.PresFechaPrestamo) AS PresFechaPrestamo,
-                    p.PresMeses, CONVERT(DATE, p.PresFechaDesembolso) AS PresFechaDesembolso,
+                SELECT p.IdPrestamo, p.PresNumero, p.PresFechaPrestamo,
+                    p.PresMeses, p.PresFechaDesembolso,
                     CASE 
                         WHEN p.PresEstPtmo = 'X' THEN 'CANCELADO'
                         ELSE 'No especificado'
@@ -801,8 +801,8 @@ class LoanReportController extends Controller
             "));
         } else if($report_type == 2) {
             $loans = DB::select(DB::raw("
-                SELECT p.IdPrestamo, p.PresNumero, CONVERT(DATE, p.PresFechaPrestamo) AS PresFechaPrestamo,
-                    p.PresMeses, CONVERT(DATE, p.PresFechaDesembolso) AS PresFechaDesembolso,
+                SELECT p.IdPrestamo, p.PresNumero, p.PresFechaPrestamo,
+                    p.PresMeses, p.PresFechaDesembolso,
                     CASE 
                         WHEN p.PresEstPtmo = 'X' THEN 'CANCELADO'
                         ELSE 'No especificado'
@@ -824,8 +824,8 @@ class LoanReportController extends Controller
             "));
         } else if ($report_type == 3) {
             $loans = DB::select(DB::raw("
-                SELECT p.IdPrestamo, p.PresNumero, CONVERT(DATE, p.PresFechaPrestamo) AS PresFechaPrestamo,
-                    p.PresMeses, CONVERT(DATE, p.PresFechaDesembolso) AS PresFechaDesembolso,
+                SELECT p.IdPrestamo, p.PresNumero, p.PresFechaPrestamo,
+                    p.PresMeses, p.PresFechaDesembolso,
                     CASE 
                         WHEN p.PresEstPtmo = 'X' THEN 'CANCELADO'
                         ELSE 'No especificado'
@@ -876,7 +876,7 @@ class LoanReportController extends Controller
                 $excel->sheet('Reporte Préstamos', function($sheet) {
                     global $rows_headers;
                     $sheet->fromModel($rows_headers, null, 'A1', false, false);
-                    $sheet->cells('A1:K1', function($cells) {
+                    $sheet->cells('A1:H1', function($cells) {
                         $cells->setBackground('#058A37');
                         $cells->setFontColor('#ffffff');  
                         $cells->setFontWeight('bold');
