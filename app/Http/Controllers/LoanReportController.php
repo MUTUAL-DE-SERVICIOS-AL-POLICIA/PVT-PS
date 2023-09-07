@@ -777,70 +777,72 @@ class LoanReportController extends Controller
     }
     public function pending_loan_report($report_type) {
         if($report_type == 1) {
-            $loans = DB::table('Prestamos as p')
-            ->joinSub(function ($query) {
-                $query->select('p.IdPrestamo', DB::raw('SUM(a.AmrCap) as SumAmr'))
-                    ->from('Prestamos as p')
-                    ->join('Amortizacion as a', 'p.IdPrestamo', '=', 'a.IdPrestamo')
-                    ->where('p.PresEstPtmo', '=', 'X')
-                    ->whereIn('a.AmrSts', ['S', 'P'])
-                    ->groupBy('p.IdPrestamo');
-            }, 'tmp', 'p.IdPrestamo', '=', 'tmp.IdPrestamo')
-            ->select('p.IdPrestamo', 'p.PresNumero', 'p.PresFechaPrestamo', 'p.PresMeses', 'p.PresFechaDesembolso', 'p.PresSaldoAct', 'p.PresSaldoAnt',
-                DB::raw('CASE WHEN p.PresEstPtmo = "X" THEN "CANCELADO" ELSE "No  especificado" END AS Estado'),
-                'p.PresMntDesembolso',
-                'tmp.SumAmr',
-                'p.PresMontoSol',
-                DB::raw('(p.PresMntDesembolso - tmp.SumAmr) AS diferencia')
-            )
-            ->whereRaw('(p.PresMntDesembolso <> tmp.SumAmr')
-            ->get();
+            $loans = DB::select(DB::raw('
+                SELECT p.IdPrestamo, p.PresNumero, p.PresFechaPrestamo, p.PresMeses, p.PresFechaDesembolso, p.PresSaldoAct, p.PresSaldoAnt, 
+                    CASE 
+                        WHEN p.PresEstPtmo = "X" THEN "CANCELADO"
+                        ELSE "No especificado"
+                    END AS Estado,
+                    p.PresMntDesembolso, tmp.SumAmr, p.PresMontoSol, (p.PresMntDesembolso  - tmp.SumAmr) AS diferencia
+                FROM Prestamos p 
+                JOIN (
+                    SELECT p2.IdPrestamo, SUM(a.AmrCap) AS SumAmr
+                    FROM Prestamos p2 
+                    INNER JOIN Amortizacion a
+                    ON p2.IdPrestamo = a.IdPrestamo 
+                    WHERE p2.PresEstPtmo = "X" 
+                    AND (a.AmrSts = "S"
+                    OR a.AmrSts = "P")
+                    GROUP BY p2.IdPrestamo
+                ) AS tmp
+                ON p.IdPrestamo = tmp.IdPrestamo
+                WHERE p.PresMntDesembolso <> tmp.SumAmr 
+            '));
         } else if($report_type == 2) {
-            $loans = DB::table('Prestamos as p')
-            ->joinSub(function ($query) {
-                $query->select('p.IdPrestamo', DB::raw('SUM(a.AmrCap) as SumAmr'))
-                    ->from('Prestamos as p')
-                    ->join('Amortizacion as a', 'p.IdPrestamo', '=', 'a.IdPrestamo')
-                    ->where('p.PresEstPtmo', '=', 'X')
-                    ->whereIn('a.AmrSts', ['S', 'P'])
-                    ->groupBy('p.IdPrestamo');
-            }, 'tmp', 'p.IdPrestamo', '=', 'tmp.IdPrestamo')
-            ->select('p.IdPrestamo', 'p.PresNumero', 'p.PresFechaPrestamo', 'p.PresMeses', 'p.PresFechaDesembolso', 'p.PresSaldoAct', 'p.PresSaldoAnt',
-                DB::raw('CASE WHEN p.PresEstPtmo = "X" THEN "CANCELADO" ELSE "No  especificado" END AS Estado'),
-                'p.PresMntDesembolso',
-                'tmp.SumAmr',
-                'p.PresMontoSol',
-                DB::raw('(p.PresMntDesembolso - tmp.SumAmr) AS diferencia')
-            )
-            ->whereRaw('(p.PresMntDesembolso < tmp.SumAmr')
-            ->get();
+            $loans = DB::select(DB::raw('
+                SELECT p.IdPrestamo, p.PresNumero, p.PresFechaPrestamo, p.PresMeses, p.PresFechaDesembolso, p.PresSaldoAct, p.PresSaldoAnt, 
+                    CASE 
+                        WHEN p.PresEstPtmo = "X" THEN "CANCELADO"
+                        ELSE "No especificado"
+                    END AS Estado,
+                    p.PresMntDesembolso, tmp.SumAmr, p.PresMontoSol, (p.PresMntDesembolso  - tmp.SumAmr) AS diferencia
 
+                FROM Prestamos p 
+                JOIN (
+                    SELECT p2.IdPrestamo, SUM(a.AmrCap) AS SumAmr
+                    FROM Prestamos p2 
+                    INNER JOIN Amortizacion a
+                    ON p2.IdPrestamo = a.IdPrestamo 
+                    WHERE p2.PresEstPtmo = "X" 
+                    AND (a.AmrSts = "S"
+                    OR a.AmrSts = "P")
+                    GROUP BY p2.IdPrestamo
+                ) AS tmp
+                ON p.IdPrestamo = tmp.IdPrestamo
+                WHERE p.PresMntDesembolso < tmp.SumAmr
+            '));
         } else if ($report_type == 3) {
-            $loans = DB::table('Prestamos as p')
-            ->joinSub(function ($query) {
-                $query->select('p.IdPrestamo', DB::raw('SUM(a.AmrCap) as SumAmr'))
-                    ->from('Prestamos as p')
-                    ->join('Amortizacion as a', 'p.IdPrestamo', '=', 'a.IdPrestamo')
-                    ->where('p.PresEstPtmo', '=', 'E')
-                    ->whereIn('a.AmrSts', ['P', 'S'])
-                    ->groupBy('p.IdPrestamo');
-            }, 'tmp', 'p.IdPrestamo', '=', 'tmp.IdPrestamo')
-            ->select(
-                'p.IdPrestamo',
-                'p.PresNumero',
-                'p.PresFechaPrestamo',
-                'p.PresMeses',
-                'p.PresFechaDesembolso',
-                'p.PresSaldoAct',
-                'p.PresSaldoAnt',
-                DB::raw('CASE WHEN p.PresEstPtmo = "X" THEN "CANCELADO" ELSE "No especificado" END AS Estado'),
-                'p.PresMntDesembolso',
-                'tmp.SumAmr',
-                'p.PresMontoSol',
-                DB::raw('(p.PresMntDesembolso - tmp.SumAmr) AS diferencia')
-            )
-            ->whereRaw('p.PresMntDesembolso = tmp.SumAmr')
-            ->get();
+            $loans = DB::select(DB::raw('
+                SELECT p.IdPrestamo, p.PresNumero, p.PresFechaPrestamo, p.PresMeses, p.PresFechaDesembolso, p.PresSaldoAct, p.PresSaldoAnt, 
+                    CASE 
+                        WHEN p.PresEstPtmo = "X" THEN "CANCELADO"
+                        ELSE "No especificado"
+                    END AS Estado,
+                    p.PresMntDesembolso, tmp.SumAmr, p.PresMontoSol, (p.PresMntDesembolso  - tmp.SumAmr) AS diferencia
+
+                FROM Prestamos p 
+                JOIN (
+                    SELECT p.IdPrestamo, SUM(a.AmrCap) AS SumAmr
+                    FROM Prestamos p
+                    INNER JOIN Amortizacion a 
+                    ON p.IdPrestamo  = a.IdPrestamo 
+                    WHERE p.PresEstPtmo = "E"
+                    AND (a.AmrSts = "P" OR a.AmrSts = "S")
+                    GROUP BY p.IdPrestamo 
+                ) AS tmp
+                ON p.IdPrestamo = tmp.IdPrestamo
+                WHERE p.PresMntDesembolso = tmp.SumAmr
+            '));
         }
 
         ini_set ('max_execution_time', 36000); 

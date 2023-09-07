@@ -67,12 +67,10 @@ export default {
             self = this
             self.dialog = true
             let parameters = {}
-            parameters.excel = true
             if(report_id !== null && report_id !== 0) {
                 axios({
                     url: `/api/pending_loan_report/${report_id}`,
                     method: 'GET',
-                    params: parameters,
                     responseType: 'blob'
                 }).then((response) => {
                     const url = window.URL.createObjectURL(new Blob([response.data]))
