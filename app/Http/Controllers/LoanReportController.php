@@ -778,12 +778,13 @@ class LoanReportController extends Controller
     public function pending_loan_report($report_type) {
         if($report_type == 1) {
             $loans = DB::select(DB::raw("
-                SELECT p.IdPrestamo, p.PresNumero, p.PresFechaPrestamo, p.PresMeses, p.PresFechaDesembolso, p.PresSaldoAct, p.PresSaldoAnt, 
+                SELECT p.IdPrestamo, p.PresNumero, CONVERT(DATE, p.PresFechaPrestamo) AS PresFechaPrestamo,
+                    p.PresMeses, CONVERT(DATE, p.PresFechaDesembolso) AS PresFechaDesembolso,
                     CASE 
                         WHEN p.PresEstPtmo = 'X' THEN 'CANCELADO'
                         ELSE 'No especificado'
                     END AS Estado,
-                    p.PresMntDesembolso, tmp.SumAmr, p.PresMontoSol, (p.PresMntDesembolso  - tmp.SumAmr) AS diferencia
+                    p.PresMntDesembolso, tmp.SumAmr, (p.PresMntDesembolso  - tmp.SumAmr) AS diferencia
                 FROM Prestamos p 
                 JOIN (
                     SELECT p2.IdPrestamo, SUM(a.AmrCap) AS SumAmr
@@ -800,12 +801,13 @@ class LoanReportController extends Controller
             "));
         } else if($report_type == 2) {
             $loans = DB::select(DB::raw("
-                SELECT p.IdPrestamo, p.PresNumero, p.PresFechaPrestamo, p.PresMeses, p.PresFechaDesembolso, p.PresSaldoAct, p.PresSaldoAnt, 
+                SELECT p.IdPrestamo, p.PresNumero, CONVERT(DATE, p.PresFechaPrestamo) AS PresFechaPrestamo,
+                    p.PresMeses, CONVERT(DATE, p.PresFechaDesembolso) AS PresFechaDesembolso,
                     CASE 
                         WHEN p.PresEstPtmo = 'X' THEN 'CANCELADO'
                         ELSE 'No especificado'
                     END AS Estado,
-                    p.PresMntDesembolso, tmp.SumAmr, p.PresMontoSol, (p.PresMntDesembolso  - tmp.SumAmr) AS diferencia
+                    p.PresMntDesembolso, tmp.SumAmr, (p.PresMntDesembolso  - tmp.SumAmr) AS diferencia
                 FROM Prestamos p 
                 JOIN (
                     SELECT p2.IdPrestamo, SUM(a.AmrCap) AS SumAmr
@@ -822,12 +824,13 @@ class LoanReportController extends Controller
             "));
         } else if ($report_type == 3) {
             $loans = DB::select(DB::raw("
-                SELECT p.IdPrestamo, p.PresNumero, p.PresFechaPrestamo, p.PresMeses, p.PresFechaDesembolso, p.PresSaldoAct, p.PresSaldoAnt, 
+                SELECT p.IdPrestamo, p.PresNumero, CONVERT(DATE, p.PresFechaPrestamo) AS PresFechaPrestamo,
+                    p.PresMeses, CONVERT(DATE, p.PresFechaDesembolso) AS PresFechaDesembolso,
                     CASE 
                         WHEN p.PresEstPtmo = 'X' THEN 'CANCELADO'
                         ELSE 'No especificado'
                     END AS Estado,
-                    p.PresMntDesembolso, tmp.SumAmr, p.PresMontoSol, (p.PresMntDesembolso  - tmp.SumAmr) AS diferencia
+                    p.PresMntDesembolso, tmp.SumAmr, (p.PresMntDesembolso  - tmp.SumAmr) AS diferencia
                 FROM Prestamos p 
                 JOIN (
                     SELECT p.IdPrestamo, SUM(a.AmrCap) AS SumAmr
@@ -849,25 +852,21 @@ class LoanReportController extends Controller
         $rows_headers = array();
         // Cabezera
         array_push($rows_headers, array(
-            'Nro Prestamo', 'Fecha de Solicitud', 'Meses', 'Fecha de Desembolso', 'Saldo Anterior',
-            'Saldo Actual', 'Estado', 'Monto Desembolsado', 'Total Suma Amortizaciones', 'Monto Solicitado',
-            'Diferencia'
-        ));
+            'Nro Préstamo', 'Fecha de Solicitud', 'Monto Desembolsado', 'Fecha de Desembolso',
+            'Total Suma Amortizaciones', 'Plazo', 'Diferencia', 'Estado'
+        ))
 
         foreach($loans as $loan)
         {
             array_push($rows_headers, array(
                 $loan->PresNumero,
                 $loan->PresFechaPrestamo,
-                $loan->PresMeses,
-                $loan->PresFechaDesembolso,
-                $loan->PresSaldoAnt,
-                $loan->PresSaldoAct,
-                $loan->Estado,
                 $loan->PresMntDesembolso,
+                $loan->PresFechaDesembolso,
                 $loan->SumAmr,
-                $loan->PresMontoSol,
+                $loan->PresMeses,
                 $loan->diferencia
+                $loan->Estado,
             ));
         }
 
