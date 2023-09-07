@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use DB;
 use Log;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Query\JoinClause;
 
 class LoanReportController extends Controller
