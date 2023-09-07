@@ -61,7 +61,7 @@ export default {
             ],
             report_selected: null
         }
-    }
+    },
     methods: {
         download: function(event, report_id) {
             self = this
