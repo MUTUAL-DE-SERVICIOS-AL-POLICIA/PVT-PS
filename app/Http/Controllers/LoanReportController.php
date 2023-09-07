@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use DB;
 use Log;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Query\JoinClause;
+
 class LoanReportController extends Controller
 {
     /**
@@ -772,5 +775,115 @@ class LoanReportController extends Controller
                 
                   
         })->download('xls');  
+    }
+    public function pending_loan_report($report_type) {
+        if($report_type == 1) {
+            $loans = DB::table('Prestamos as p')
+            ->joinSub(function ($query) {
+                $query->select('p.IdPrestamo', DB::raw('SUM(a.AmrCap) as SumAmr'))
+                    ->from('Prestamos as p')
+                    ->join('Amortizacion as a', 'p.IdPrestamo', '=', 'a.IdPrestamo')
+                    ->where('p.PresEstPtmo', '=', 'X')
+                    ->whereIn('a.AmrSts', ['S', 'P'])
+                    ->groupBy('p.IdPrestamo');
+            }, 'tmp', 'p.IdPrestamo', '=', 'tmp.IdPrestamo')
+            ->select('p.IdPrestamo', 'p.PresNumero', 'p.PresFechaPrestamo', 'p.PresMeses', 'p.PresFechaDesembolso', 'p.PresSaldoAct', 'p.PresSaldoAnt',
+                DB::raw('CASE WHEN p.PresEstPtmo = "X" THEN "CANCELADO" ELSE "No  especificado" END AS Estado'),
+                'p.PresMntDesembolso',
+                'tmp.SumAmr',
+                'p.PresMontoSol',
+                DB::raw('(p.PresMntDesembolso - tmp.SumAmr) AS diferencia')
+            )
+            ->whereRaw('(p.PresMntDesembolso <> tmp.SumAmr')
+            ->get();
+        } else if($report_type == 2) {
+            $loans = DB::table('Prestamos as p')
+            ->joinSub(function ($query) {
+                $query->select('p.IdPrestamo', DB::raw('SUM(a.AmrCap) as SumAmr'))
+                    ->from('Prestamos as p')
+                    ->join('Amortizacion as a', 'p.IdPrestamo', '=', 'a.IdPrestamo')
+                    ->where('p.PresEstPtmo', '=', 'X')
+                    ->whereIn('a.AmrSts', ['S', 'P'])
+                    ->groupBy('p.IdPrestamo');
+            }, 'tmp', 'p.IdPrestamo', '=', 'tmp.IdPrestamo')
+            ->select('p.IdPrestamo', 'p.PresNumero', 'p.PresFechaPrestamo', 'p.PresMeses', 'p.PresFechaDesembolso', 'p.PresSaldoAct', 'p.PresSaldoAnt',
+                DB::raw('CASE WHEN p.PresEstPtmo = "X" THEN "CANCELADO" ELSE "No  especificado" END AS Estado'),
+                'p.PresMntDesembolso',
+                'tmp.SumAmr',
+                'p.PresMontoSol',
+                DB::raw('(p.PresMntDesembolso - tmp.SumAmr) AS diferencia')
+            )
+            ->whereRaw('(p.PresMntDesembolso < tmp.SumAmr')
+            ->get();
+
+        } else if ($report_type == 3) {
+            $loans = DB::table('Prestamos as p')
+            ->joinSub(function ($query) {
+                $query->select('p.IdPrestamo', DB::raw('SUM(a.AmrCap) as SumAmr'))
+                    ->from('Prestamos as p')
+                    ->join('Amortizacion as a', 'p.IdPrestamo', '=', 'a.IdPrestamo')
+                    ->where('p.PresEstPtmo', '=', 'E')
+                    ->whereIn('a.AmrSts', ['P', 'S'])
+                    ->groupBy('p.IdPrestamo');
+            }, 'tmp', 'p.IdPrestamo', '=', 'tmp.IdPrestamo')
+            ->select(
+                'p.IdPrestamo',
+                'p.PresNumero',
+                'p.PresFechaPrestamo',
+                'p.PresMeses',
+                'p.PresFechaDesembolso',
+                'p.PresSaldoAct',
+                'p.PresSaldoAnt',
+                DB::raw('CASE WHEN p.PresEstPtmo = "X" THEN "CANCELADO" ELSE "No especificado" END AS Estado'),
+                'p.PresMntDesembolso',
+                'tmp.SumAmr',
+                'p.PresMontoSol',
+                DB::raw('(p.PresMntDesembolso - tmp.SumAmr) AS diferencia')
+            )
+            ->whereRaw('p.PresMntDesembolso = tmp.SumAmr')
+            ->get();
+        }
+
+        ini_set ('max_execution_time', 36000); 
+        ini_set ('memory_limit', '9600M');
+        global $rows_headers;
+        $rows_headers = array();
+        // Cabezera
+        array_push($rows_headers, array(
+            'Nro Prestamo', 'Fecha de Solicitud', 'Meses', 'Fecha de Desembolso', 'Saldo Anterior'
+            'Saldo Actual', 'Estado', 'Monto Desembolsado', 'Total Suma Amortizaciones', 'Monto Solicitado',
+            'Diferencia'
+        ));
+
+        foreach($loans as $loan)
+        {
+            array_push($rows_headers, array(
+                $loan->PresNumero,
+                $loan->PresFechaPrestamo,
+                $loan->PresMeses,
+                $loan->PresFechaDesembolso,
+                $loan->PresSaldoAnt,
+                $loan->PresSaldoAct,
+                $loan->Estado,
+                $loan->PresMntDesembolso,
+                $loan->SumAmr,
+                $loan->PresMontoSol
+                $loan->diferencia
+            ));
+        }
+
+        Excel::create('prestamos', function($excel)
+        {
+            global $rows_headers;
+                $excel->sheet('Reporte Préstamos', function($sheet) {
+                    global $rows_headers;
+                    $sheet->fromModel($rows_headers, null, 'A1', false, false);
+                    $sheet->cells('A1:K1', function($cells) {
+                    $cells->setBackground('#058A37');
+                    $cells->setFontColor('#ffffff');  
+                    $cells->setFontWeight('bold');
+                    });
+                });
+        })->download('xls');
     }
 }

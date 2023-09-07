@@ -17,6 +17,7 @@ import NewsComand from './views/loans/NewsComand'
 import Observations from './views/EconomicComplement/index'
 import Accounting from './views/loans/Accounting'
 import Treasury from './views/loans/Treasury'
+import LoanReport from './views/loans/LoanReport'
 
 export const routes = [
     {
@@ -213,5 +214,16 @@ export const routes = [
         components:{ 
             nomenu: Login,
         }
-    },
+    },  {
+        path: '/report_loan',
+        name: 'report_loan',
+        components: {
+            default: LoanReport,
+            toolbar: Toolbar,
+            nav: Nav
+        },
+        meta: {
+            requiresAuth: true
+        }
+    }
 ]
