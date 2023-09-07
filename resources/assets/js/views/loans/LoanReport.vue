@@ -63,12 +63,12 @@ export default {
         }
     },
     methods: {
-        download: function(event, report_id) {
+        download: function(report_id) {
             self = this
             self.dialog = true
-            let parameters
+            let parameters = {}
             parameters.excel = true
-            if(report_id !== null || report_id !== 0) {
+            if(report_id !== null && report_id !== 0) {
                 axios({
                     url: `/api/pending_loan_report/${report_id}`,
                     method: 'GET',
@@ -81,10 +81,10 @@ export default {
                     link.setAttribute('download', 'Report Préstamos' + moment().format() + '.xls')
                     document.body.appendChild(link)
                     link.click()
+                    window.URL.revokeObjectURL(url)
                     self.dialog = false
                 })
-            }
-            self.dialog = false
+            } else self.dialog = false
         }
     }
 }
