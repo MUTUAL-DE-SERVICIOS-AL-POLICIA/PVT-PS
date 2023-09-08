@@ -962,7 +962,7 @@ class LoanReportController extends Controller
         {
             global $rows_headers;
                 $excel->sheet('Reporte Préstamos', function($sheet) {
-                    global $rows_headers;
+                    global $rows_headers, $cell_limit;
                     $sheet->fromModel($rows_headers, null, 'A1', false, false);
                     $sheet->cells('A1:'.$cell_limit, function($cells) {
                         $cells->setBackground('#058A37');
