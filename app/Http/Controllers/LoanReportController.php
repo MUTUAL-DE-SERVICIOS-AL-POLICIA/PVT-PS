@@ -903,6 +903,7 @@ class LoanReportController extends Controller
                 }
                 break;
             case 4: // Préstamos con estado pendiente
+                global $cell_limit;
                 $cell_limit = 'F1';
                 $loans = DB::select(DB::raw("
                     SELECT p.IdPrestamo, p.PresNumero, p.PresFechaPrestamo,
@@ -927,6 +928,7 @@ class LoanReportController extends Controller
                 }
                 break;
             case 5: // Amortizaciones con estado pendiente
+                global $cell_limit;
                 $cell_limit = 'J1';
                 $amortizations = DB::select(DB::raw("
                     SELECT p.PresNumero, a.AmrFecPag, a.AmrCap, a.AmrInt, 
@@ -960,7 +962,7 @@ class LoanReportController extends Controller
 
         Excel::create('prestamos', function($excel)
         {
-            global $rows_headers;
+            global $rows_headers, $cell_limit;
                 $excel->sheet('Reporte Préstamos', function($sheet) {
                     global $rows_headers, $cell_limit;
                     $sheet->fromModel($rows_headers, null, 'A1', false, false);
