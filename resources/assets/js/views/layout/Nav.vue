@@ -87,7 +87,8 @@ export default {
                 { icon: 'fa-puzzle-piece', text: 'Observados Complemento ' , link: '/observations' },
                 { icon: 'fa-money', text: 'Contabilidad' , link: '/accounting' },
                 { icon: 'fa-university', text: 'Tesorería' , link: '/treasury' },
-                { icon: 'fa-file-excel-o', text: 'Reportes préstamos', link: '/report_loan' }
+                { icon: 'fa-file-excel-o', text: 'Reportes préstamos', link: '/report_loan' },
+                { icon: 'fa-file-excel-o', text: 'Reporte Aportantes', link: '/report_contribution' }
             ]
         };
     },

@@ -18,6 +18,7 @@ import Observations from './views/EconomicComplement/index'
 import Accounting from './views/loans/Accounting'
 import Treasury from './views/loans/Treasury'
 import LoanReport from './views/loans/LoanReport'
+import ContributionReport from './views/contributions/ContributionReport'
 
 export const routes = [
     {
@@ -219,6 +220,17 @@ export const routes = [
         name: 'report_loan',
         components: {
             default: LoanReport,
+            toolbar: Toolbar,
+            nav: Nav
+        },
+        meta: {
+            requiresAuth: true
+        }
+    },  {
+        path: '/report_contribution',
+        name: 'report_contribution',
+        components:{
+            default: ContributionReport,
             toolbar: Toolbar,
             nav: Nav
         },
