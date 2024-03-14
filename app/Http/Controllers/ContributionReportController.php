@@ -50,7 +50,6 @@ class ContributionReportController extends Controller
                 FROM PrsAportes
                 LEFT JOIN padron ON (PrsAportes.idpadron = padron.idpadron)
                 LEFT JOIN prsAportesMes ON (PrsAportes.prscod = prsAportesMes.prscod)
-                WHERE prsclasifcod <> 'ITEM \"0\"'
                 ORDER BY padron.PadCedulaIdentidad, padron.PadMatricula, prsAportesMes.tasagestion, prsAportesMes.mescod ASC
             "));
     
