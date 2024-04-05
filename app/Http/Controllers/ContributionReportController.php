@@ -45,7 +45,7 @@ class ContributionReportController extends Controller
                     PrsAportes.prsaporgestion AS aporte_ultimo_gestion,
                     PrsAportes.prsapormes AS aporte_ultimo_mes,
                     PrsAportes.prsaporfecultmov AS fecha_ultimo_aporte,
-                    PrsAportes.prsclasifcod AS clasificacion,
+                    REPLACE(LTRIM(RTRIM(PrsAportes.prsclasifcod)), '"', '') AS clasificacion,
                     PrsAportes.prsapormonto AS prsa_por_monto
                 FROM PrsAportes
                 LEFT JOIN padron ON (PrsAportes.idpadron = padron.idpadron)
