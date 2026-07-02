@@ -112,6 +112,6 @@ class ContributionReportController extends Controller
                     $cells->setFontWeight('bold');
                 });
             });
-        })->download('xls');
+        })->download('xlsx');
     }
 }
